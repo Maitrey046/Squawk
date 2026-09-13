@@ -131,6 +131,12 @@
     font-size:12px;color:var(--text-dim);margin-top:14px;
   }
   .compass-mode-note{font-family:var(--font-data);font-size:9.5px;color:var(--text-dimmer);margin-top:6px;}
+  .compass-mode-note button{
+    background:none;border:none;color:var(--amber);font-family:var(--font-data);font-size:9.5px;
+    text-decoration:underline;padding:0;cursor:pointer;
+  }
+  #compassRose{transition:transform .25s linear;}
+  #fixedPointer{fill:var(--text-dim);}
   .hero.state-outer .readout-dist,.hero.state-outer #needle path{color:var(--amber);fill:var(--amber);stroke:var(--amber);}
   .hero.state-inner .readout-dist{color:var(--red);}
   .hero.state-inner #needle path{fill:var(--red);stroke:var(--red);}
@@ -278,6 +284,7 @@
     <div class="clock" id="clock">--:--</div>
     <button class="icon-btn" id="refreshBtn" title="Refresh now">&#8635;</button>
     <button class="icon-btn" id="themeToggle" title="Night mode">&#9788;</button>
+    <button class="icon-btn" id="featuresBtn" title="Features">&#10022;</button>
     <button class="icon-btn" id="settingsBtn" title="Settings">&#9881;</button>
   </header>
 
@@ -300,6 +307,7 @@
         </div>
       </div>
       <div class="compass-mode-note" id="compassModeNote">north-up (phone compass off)</div>
+      <div class="compass-mode-note" id="compassPermInline" hidden><button id="compassPermInlineBtn">Tap to enable compass</button></div>
     </section>
 
     <section class="tape-row" id="tapeRow" hidden>
@@ -393,13 +401,21 @@
     <label class="field">Refresh interval (seconds)
       <input type="number" id="pollInput" value="5" min="3" max="60">
     </label>
+    <button class="btn-primary" id="applySettings">APPLY</button>
+    <button class="btn-secondary" id="updateLocationBtn">UPDATE LOCATION</button>
+  </div>
+</div>
+
+<div class="sheet" id="featuresSheet" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-head"><span>FEATURES</span><button class="icon-btn" id="closeFeatures">&#10005;</button></div>
+
+    <div class="sheet-subhead">COMPASS</div>
     <div class="field-row">
-      <span>Use phone's compass<br><span style="font-size:11px;color:var(--text-dimmer)">Needle points relative to where you're facing</span></span>
+      <span>Phone compass<br><span style="font-size:11px;color:var(--text-dimmer)">Stays on all the time; the dial turns with your phone instead of the arrow</span></span>
       <label class="switch"><input type="checkbox" id="compassToggle" checked><span class="switch-track"></span></label>
     </div>
     <button class="btn-secondary" id="enableCompassBtn" hidden>ENABLE COMPASS ACCESS</button>
-    <button class="btn-primary" id="applySettings">APPLY</button>
-    <button class="btn-secondary" id="updateLocationBtn">UPDATE LOCATION</button>
 
     <div class="sheet-subhead">VIEW MODES</div>
     <button class="btn-secondary" id="cockpitBtn">COCKPIT MODE (LANDSCAPE)</button>
@@ -447,7 +463,7 @@
     rangeNm:15, outerKm:15, innerKm:7, maxAltFt:15000, pollSec:5,
     apiIdx:0, pollTimer:null,
     theme:"day",
-    compassEnabled:true, compassSupported:false, deviceHeading:null, deviceBeta:null,
+    compassEnabled:true, compassSupported:false, deviceHeading:null, deviceElevation:null,
     online:navigator.onLine,
     dataStatus:"idle",
     logbook:{}, timeline:[],
@@ -489,7 +505,7 @@
     locateBanner:$("locateBanner"), locateBtn:$("locateBtn"), locateError:$("locateError"),
     heroSection:$("heroSection"), tapeRow:$("tapeRow"), identStrip:$("identStrip"),
     targetDist:$("targetDist"), targetBearingDeg:$("targetBearingDeg"), targetLabel:$("targetLabel"),
-    compassModeNote:$("compassModeNote"),
+    compassModeNote:$("compassModeNote"), compassPermInline:$("compassPermInline"), compassPermInlineBtn:$("compassPermInlineBtn"),
     tapeAlt:$("tapeAlt"), tapeSpd:$("tapeSpd"), tapeVs:$("tapeVs"), tapeHdg:$("tapeHdg"),
     identCallsign:$("identCallsign"), identAirline:$("identAirline"), identType:$("identType"),
     wxTemp:$("wxTemp"), wxDesc:$("wxDesc"), wxFeels:$("wxFeels"), wxHumidity:$("wxHumidity"),
@@ -503,6 +519,7 @@
     timelineList:$("timelineList"), logbookCount:$("logbookCount"), logbookList:$("logbookList"),
     clearLogbookBtn:$("clearLogbookBtn"),
     settingsSheet:$("settingsSheet"), settingsBtn:$("settingsBtn"), closeSettings:$("closeSettings"),
+    featuresSheet:$("featuresSheet"), featuresBtn:$("featuresBtn"), closeFeatures:$("closeFeatures"),
     rangeInput:$("rangeInput"), outerInput:$("outerInput"), innerInput:$("innerInput"),
     maxAltInput:$("maxAltInput"), pollInput:$("pollInput"), compassToggle:$("compassToggle"),
     enableCompassBtn:$("enableCompassBtn"),
@@ -608,6 +625,10 @@
   els.closeSettings.addEventListener("click", function(){ els.settingsSheet.hidden=true; });
   els.settingsSheet.addEventListener("click", function(e){ if(e.target===els.settingsSheet) els.settingsSheet.hidden=true; });
 
+  els.featuresBtn.addEventListener("click", function(){ els.featuresSheet.hidden=false; });
+  els.closeFeatures.addEventListener("click", function(){ els.featuresSheet.hidden=true; });
+  els.featuresSheet.addEventListener("click", function(e){ if(e.target===els.featuresSheet) els.featuresSheet.hidden=true; });
+
   els.applySettings.addEventListener("click", function(){
     state.rangeNm = clampNum(els.rangeInput.value, 1, 250, 15);
     state.outerKm = clampNum(els.outerInput.value, 1, 200, 15);
@@ -627,6 +648,7 @@
     saveSettings();
     updateCompassNote();
     if(state.compassEnabled) initCompassSensor();
+    render(state.lastList);
   });
   els.clearLogbookBtn.addEventListener("click", function(){
     if(!confirm("Clear all logged aircraft and today's timeline? This can't be undone.")) return;
@@ -710,17 +732,27 @@
   }
 
   /* ============ DEVICE COMPASS ============ */
+  // The compass sensor is meant to run continuously in the background for
+  // as long as "Phone compass" is on (default: on) — it's not something you
+  // start and stop per screen. The only gate is iOS's own permission
+  // prompt, which by law requires a tap; we surface that tap in two places
+  // (inline under the dial, and in Features) so it isn't easy to miss.
   function initCompassSensor(){
-    if(!state.compassEnabled) return;
+    if(!state.compassEnabled || state.compassSupported) return;
     if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
-      // iOS 13+ requires a user gesture before sensor access is granted.
-      els.enableCompassBtn.hidden = false;
-      els.enableCompassBtn.onclick = function(){
+      var requestPerm = function(){
         DeviceOrientationEvent.requestPermission().then(function(perm){
-          if(perm === "granted"){ els.enableCompassBtn.hidden = true; attachOrientation(); }
-          else { showLocateError && null; }
+          if(perm === "granted"){
+            els.enableCompassBtn.hidden = true;
+            els.compassPermInline.hidden = true;
+            attachOrientation();
+          }
         }).catch(function(){});
       };
+      els.enableCompassBtn.hidden = false;
+      els.enableCompassBtn.onclick = requestPerm;
+      els.compassPermInline.hidden = false;
+      els.compassPermInlineBtn.onclick = requestPerm;
     } else if("DeviceOrientationEvent" in window || "ondeviceorientationabsolute" in window){
       attachOrientation();
     }
@@ -736,14 +768,33 @@
     updateCompassNote();
   }
 
+  // Tilt-compensated camera orientation: rotates the vector pointing out of
+  // the phone's back camera (local -Z) into world space using the full
+  // alpha/beta/gamma rotation, then reads off compass heading and elevation
+  // angle above the horizon. This is what makes "tilt the phone up" reliably
+  // move the AR view upward regardless of how you're holding the phone —
+  // using beta alone breaks depending on orientation/handedness.
+  function computeCameraOrientation(alpha, beta, gamma){
+    var _z = toRad(alpha||0), _x = toRad(beta||0), _y = toRad(gamma||0);
+    var cX=Math.cos(_x), cY=Math.cos(_y), cZ=Math.cos(_z);
+    var sX=Math.sin(_x), sY=Math.sin(_y), sZ=Math.sin(_z);
+    var m13 = cY*sZ*sX + cZ*sY;
+    var m23 = sZ*sY - cZ*cY*sX;
+    var m33 = cX*cY;
+    var camX = -m13, camY = -m23, camZ = -m33;
+    var heading = (toDeg(Math.atan2(camX, camY)) + 360) % 360;
+    var elevation = toDeg(Math.asin(Math.max(-1, Math.min(1, camZ))));
+    return { heading:heading, elevation:elevation };
+  }
+
   var lastArRender = 0;
   function handleOrientation(e){
-    var heading;
-    if(e.webkitCompassHeading!=null) heading = e.webkitCompassHeading;
-    else if(e.alpha!=null) heading = 360 - e.alpha;
+    if(e.alpha==null || e.beta==null || e.gamma==null) return;
+    var orient = computeCameraOrientation(e.alpha, e.beta, e.gamma);
+    var heading = e.webkitCompassHeading!=null ? e.webkitCompassHeading : orient.heading;
     if(heading==null || isNaN(heading)) return;
     state.deviceHeading = (heading+360)%360;
-    state.deviceBeta = e.beta!=null ? e.beta : state.deviceBeta;
+    state.deviceElevation = orient.elevation;
     if(state.compassEnabled) render(state.lastList);
     var now = Date.now();
     if(state.arActive && now-lastArRender>120){ lastArRender=now; renderARMarkers(state.lastList); }
@@ -751,21 +802,29 @@
 
   function updateCompassNote(){
     if(!state.compassEnabled){
-      els.compassModeNote.textContent = "north-up (phone compass off)";
+      els.compassModeNote.textContent = "north-up \u2014 phone compass is off (Features)";
     } else if(!state.compassSupported){
-      els.compassModeNote.textContent = "north-up (compass sensor unavailable)";
+      els.compassModeNote.textContent = "north-up \u2014 waiting on compass sensor";
     } else {
-      els.compassModeNote.textContent = "pointing relative to your heading";
+      els.compassModeNote.textContent = "dial turns with you \u2014 line up the arrow at top";
     }
   }
 
   /* ============ COMPASS SVG ============ */
+  // Two layers: #compassRose (tick marks, N/E/S/W labels, and the target
+  // marker) rotates as a single rigid disc to reflect the phone's actual
+  // heading. #fixedPointer never rotates — it always points straight up on
+  // screen as a stable reference. Line up the target marker under the fixed
+  // pointer and you're facing the aircraft. When the phone compass is off
+  // (or unavailable), the rose stays put north-up and the target marker
+  // alone points at the absolute bearing, same as a plain map compass.
   function buildCompass(){
     var svg = document.getElementById("compassSvg");
     var cx=150, cy=150, rOuter=130, rTick=118, rLabel=98;
     var html = "";
     html += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rOuter+'" fill="none" stroke="var(--border)" stroke-width="2"/>';
     html += '<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="var(--text-dim)"/>';
+    html += '<g id="compassRose" style="transform-origin:'+cx+'px '+cy+'px;">';
     for(var d=0; d<360; d+=10){
       var isMajor = d%30===0;
       var r1 = rOuter, r2 = isMajor ? rTick-14 : rTick;
@@ -780,19 +839,20 @@
       var x=cx+rLabel*Math.cos(rad), y=cy+rLabel*Math.sin(rad)+5;
       html += '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="Barlow Condensed" font-weight="700" font-size="16" fill="var(--text-dim)">'+c[0]+'</text>';
     });
-    html += '<g id="needle"><path d="M150,42 L162,90 L150,78 L138,90 Z" fill="var(--text-dimmer)" stroke="none"/></g>';
+    html += '<g id="needle" style="transform-origin:'+cx+'px '+cy+'px;"><path d="M150,42 L162,90 L150,78 L138,90 Z" fill="var(--text-dimmer)" stroke="none"/></g>';
+    html += '</g>';
+    html += '<path id="fixedPointer" d="M150,14 L158,34 L142,34 Z"/>';
     svg.innerHTML = html;
   }
   buildCompass();
 
   function setNeedle(bearing){
+    var rose = document.getElementById("compassRose");
     var needle = document.getElementById("needle");
-    if(!needle) return;
-    var rotate = bearing;
-    if(state.compassEnabled && state.deviceHeading!=null){
-      rotate = (bearing - state.deviceHeading + 360) % 360;
-    }
-    needle.style.transform = "rotate("+rotate+"deg)";
+    if(!rose || !needle) return;
+    var useDeviceHeading = state.compassEnabled && state.deviceHeading!=null;
+    rose.style.transform = "rotate("+(useDeviceHeading ? -state.deviceHeading : 0)+"deg)";
+    needle.style.transform = "rotate("+bearing+"deg)";
   }
 
   /* ============ MAP ============ */
@@ -1217,7 +1277,7 @@
   els.heroSection.parentNode.insertBefore(cockpitAnchor, els.heroSection);
 
   function enterCockpit(){
-    els.settingsSheet.hidden = true;
+    els.featuresSheet.hidden = true;
     state.cockpitActive = true;
     els.cockpitView.hidden = false;
     els.cockpitView.insertBefore(els.heroSection, els.cockpitView.firstChild);
@@ -1243,7 +1303,7 @@
 
   /* ============ FULLSCREEN (VERTICAL) MODE ============ */
   function enterFullscreenMode(){
-    els.settingsSheet.hidden = true;
+    els.featuresSheet.hidden = true;
     state.fullscreenActive = true;
     document.body.classList.add("fullscreen-mode");
     if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){});
@@ -1274,7 +1334,7 @@
   /* ============ AR MODE ============ */
   var arStream = null;
   function openAR(){
-    els.settingsSheet.hidden = true;
+    els.featuresSheet.hidden = true;
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
       alert("Camera access isn't available on this browser/device.");
       return;
@@ -1305,7 +1365,7 @@
   function renderARMarkers(list){
     if(!state.arActive || !list || state.deviceHeading==null){ els.arMarkers.innerHTML=""; return; }
     var heading = state.deviceHeading;
-    var tiltFromHorizon = state.deviceBeta!=null ? (state.deviceBeta-90) : 0;
+    var cameraElev = state.deviceElevation!=null ? state.deviceElevation : 0; // degrees above horizon the camera is currently aimed
     var HFOV = 60, VFOV = 45;
     var html = "";
     list.slice(0,15).forEach(function(p){
@@ -1313,7 +1373,7 @@
       if(Math.abs(rel) > HFOV/2+8) return;
       var altM = (p.alt||0)*0.3048, distM = p.dist*1000;
       var elevDeg = distM>0 ? Math.atan2(altM, distM)*180/Math.PI : 0;
-      var screenElev = elevDeg - tiltFromHorizon;
+      var screenElev = elevDeg - cameraElev;
       if(Math.abs(screenElev) > VFOV/2+8) return;
       var xPct = 50 + (rel/(HFOV/2))*50;
       var yPct = 50 - (screenElev/(VFOV/2))*50;

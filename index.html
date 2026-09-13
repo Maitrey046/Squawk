@@ -22,6 +22,7 @@
     --cyan:#4DD8C0;
     --red:#FF4433;
     --red-dim:#7A231C;
+    --green:#4CD964;
     --text:#E9EEEE;
     --text-dim:#71827F;
     --text-dimmer:#455052;
@@ -38,6 +39,7 @@
     --cyan:#FF4433;
     --red:#FF6B5A;
     --red-dim:#8A2E22;
+    --green:#FF8A65;
     --text:#FF6B5A;
     --text-dim:#8A3A30;
     --text-dimmer:#5C2A22;
@@ -57,24 +59,41 @@
   /* ---------- top bar ---------- */
   .topbar{
     position:sticky;top:0;z-index:20;
-    display:flex;align-items:center;gap:10px;
+    display:flex;align-items:center;gap:8px;
     padding:14px 16px;
     background:var(--bg);
     border-bottom:1px solid var(--border);
   }
   .brand{font-family:var(--font-data);font-weight:700;letter-spacing:2px;font-size:15px;color:var(--text);}
+  .status-wrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
   .status{
-    flex:1;
     font-family:var(--font-data);font-size:10.5px;color:var(--text-dim);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    display:flex;align-items:center;gap:5px;
   }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--text-dimmer);flex:none;}
+  .dot.live{background:var(--green);}
+  .dot.degraded{background:var(--amber);}
+  .dot.bad{background:var(--red);}
+  .net-status{font-family:var(--font-data);font-size:9.5px;color:var(--text-dimmer);}
+  .net-status.offline{color:var(--red);}
   .clock{font-family:var(--font-data);font-size:13px;color:var(--text-dim);}
   .icon-btn{
     background:none;border:1px solid var(--border);color:var(--text);
-    width:34px;height:34px;border-radius:6px;font-size:15px;
+    width:34px;height:34px;border-radius:6px;font-size:15px;flex:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;
   }
   .icon-btn:active{background:var(--panel-2);}
+  .icon-btn.spin svg,.icon-btn.spin{animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- critical banner ---------- */
+  .banner{
+    margin:12px 16px 0;padding:10px 14px;border-radius:8px;
+    font-family:var(--font-data);font-size:12px;line-height:1.5;
+    border:1px solid var(--red-dim);background:rgba(255,68,51,.08);color:var(--red);
+  }
+  .banner.warn{border-color:var(--amber-dim);background:rgba(255,179,0,.08);color:var(--amber);}
 
   /* ---------- locate banner ---------- */
   .locate-banner{
@@ -93,13 +112,14 @@
     font-family:var(--font-label);font-weight:600;letter-spacing:1px;font-size:13px;
     padding:11px 18px;cursor:pointer;width:100%;margin-top:10px;
   }
+  .btn-secondary.danger{color:var(--red);border-color:var(--red-dim);}
   .locate-error{color:var(--red);font-size:12.5px;margin-top:10px;font-family:var(--font-data);}
 
   /* ---------- hero / compass ---------- */
   .hero{padding:20px 16px 6px;text-align:center;}
   .compass-wrap{position:relative;width:264px;height:264px;margin:0 auto;}
   .compass-wrap svg{width:100%;height:100%;display:block;}
-  #needle{transform-origin:150px 150px;transition:transform .6s cubic-bezier(.4,0,.2,1);}
+  #needle{transform-origin:150px 150px;transition:transform .4s cubic-bezier(.4,0,.2,1);}
   .compass-readout{
     position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
     text-align:center;pointer-events:none;
@@ -110,6 +130,7 @@
     font-family:var(--font-label);font-weight:600;letter-spacing:1.5px;
     font-size:12px;color:var(--text-dim);margin-top:14px;
   }
+  .compass-mode-note{font-family:var(--font-data);font-size:9.5px;color:var(--text-dimmer);margin-top:6px;}
   .hero.state-outer .readout-dist,.hero.state-outer #needle path{color:var(--amber);fill:var(--amber);stroke:var(--amber);}
   .hero.state-inner .readout-dist{color:var(--red);}
   .hero.state-inner #needle path{fill:var(--red);stroke:var(--red);}
@@ -157,6 +178,26 @@
   .aircraft-row .r-dist{color:var(--amber);}
   .empty-note{padding:16px;text-align:center;color:var(--text-dimmer);font-size:13px;}
 
+  /* ---------- stats ---------- */
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px;}
+  .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .stat-title{font-size:10px;letter-spacing:1.2px;color:var(--text-dim);font-weight:600;}
+  .stat-main{font-family:var(--font-data);font-size:16px;font-weight:700;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .timeline{margin:12px 16px 0;background:var(--panel);border:1px solid var(--border);border-radius:8px;max-height:180px;overflow-y:auto;}
+  .timeline-row{display:flex;gap:10px;padding:8px 12px;font-family:var(--font-data);font-size:12px;border-bottom:1px solid var(--border);}
+  .timeline-row:last-child{border-bottom:none;}
+  .tl-time{color:var(--text-dim);min-width:42px;}
+  .tl-call{color:var(--text);font-weight:700;}
+
+  .logbook-list{margin:0 16px;display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;}
+  .logbook-row{background:var(--panel);padding:10px 14px;font-family:var(--font-data);font-size:12px;}
+  .lb-top{display:flex;justify-content:space-between;}
+  .lb-call{font-weight:700;color:var(--amber);}
+  .lb-seen{color:var(--text-dim);}
+  .lb-meta{color:var(--text-dim);margin-top:2px;}
+  .lb-stats{color:var(--text-dimmer);margin-top:2px;}
+
   /* ---------- settings sheet ---------- */
   .sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:flex-end;}
   .sheet-inner{
@@ -166,16 +207,63 @@
   }
   .sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
   .sheet-head span{font-weight:700;letter-spacing:1.5px;font-size:14px;}
+  .sheet-subhead{font-size:11px;letter-spacing:1.5px;color:var(--text-dim);font-weight:600;margin:18px 0 8px;}
   .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;font-size:13px;color:var(--text-dim);}
-  .field input{
+  .field input[type="number"]{
     background:var(--panel);border:1px solid var(--border);color:var(--text);
     border-radius:6px;padding:10px 12px;font-family:var(--font-data);font-size:14px;
   }
+  .field-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--text-dim);margin-bottom:14px;}
+  .switch{position:relative;width:42px;height:24px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch-track{position:absolute;inset:0;background:var(--panel-2);border:1px solid var(--border);border-radius:12px;transition:.2s;}
+  .switch-track:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text-dim);border-radius:50%;transition:.2s;}
+  .switch input:checked + .switch-track{background:var(--amber-dim);}
+  .switch input:checked + .switch-track:before{transform:translateX(18px);background:var(--amber);}
+  .version-block{font-family:var(--font-data);font-size:10.5px;color:var(--text-dimmer);line-height:1.7;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
   [hidden]{display:none !important;}
+
+  /* ---------- cockpit mode ---------- */
+  .cockpit-view{
+    position:fixed;inset:0;background:var(--bg);z-index:60;
+    display:flex;align-items:center;justify-content:space-around;
+    padding:16px;gap:10px;
+  }
+  .cockpit-view .hero{padding:0;flex:none;}
+  .cockpit-view .tape-row{margin:0;flex-direction:column;width:120px;}
+  .cockpit-view .ident-strip{margin:0;flex-direction:column;align-items:flex-start;width:150px;}
+  .cockpit-exit{position:absolute;top:14px;right:14px;z-index:61;}
+  .cockpit-status{position:absolute;top:14px;left:14px;font-family:var(--font-data);font-size:10px;color:var(--text-dim);z-index:61;}
+
+  /* ---------- fullscreen (vertical) mode ---------- */
+  body.fullscreen-mode .context-grid,
+  body.fullscreen-mode #map,
+  body.fullscreen-mode .stats-grid,
+  body.fullscreen-mode .timeline,
+  body.fullscreen-mode .logbook-list,
+  body.fullscreen-mode .section-head{display:none;}
+  .fullscreen-exit{position:fixed;top:14px;right:14px;z-index:61;}
+
+  /* ---------- AR mode ---------- */
+  .ar-overlay{position:fixed;inset:0;background:#000;z-index:70;overflow:hidden;}
+  .ar-overlay video{width:100%;height:100%;object-fit:cover;}
+  .ar-markers{position:absolute;inset:0;pointer-events:none;}
+  .ar-tag{
+    position:absolute;transform:translate(-50%,-100%);
+    background:rgba(8,11,12,.72);border:1px solid var(--amber);border-radius:6px;
+    padding:4px 8px;text-align:center;white-space:nowrap;
+  }
+  .ar-tag-call{font-family:var(--font-data);font-weight:700;font-size:12px;color:var(--amber);}
+  .ar-tag-meta{font-family:var(--font-data);font-size:10px;color:var(--text-dim);}
+  .ar-hint{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-family:var(--font-data);font-size:11px;color:var(--text-dim);padding:0 20px;}
+  .ar-close{position:absolute;top:14px;right:14px;z-index:71;background:rgba(8,11,12,.7);}
 
   @media (max-width:360px){
     .compass-wrap{width:230px;height:230px;}
     .context-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (orientation:landscape){
+    .cockpit-view{flex-direction:row;}
   }
 </style>
 </head>
@@ -183,11 +271,17 @@
 <div class="app">
   <header class="topbar">
     <div class="brand">SQUAWK</div>
-    <div class="status" id="apiStatus">not started</div>
+    <div class="status-wrap">
+      <div class="status"><span class="dot" id="statusDot"></span><span id="apiStatus">not started</span></div>
+      <div class="net-status" id="netStatus">checking network&hellip;</div>
+    </div>
     <div class="clock" id="clock">--:--</div>
+    <button class="icon-btn" id="refreshBtn" title="Refresh now">&#8635;</button>
     <button class="icon-btn" id="themeToggle" title="Night mode">&#9788;</button>
     <button class="icon-btn" id="settingsBtn" title="Settings">&#9881;</button>
   </header>
+
+  <div class="banner" id="statusBanner" hidden></div>
 
   <main>
     <section class="locate-banner" id="locateBanner">
@@ -205,6 +299,7 @@
           <div class="readout-label" id="targetLabel">NO AIRCRAFT IN RANGE</div>
         </div>
       </div>
+      <div class="compass-mode-note" id="compassModeNote">north-up (phone compass off)</div>
     </section>
 
     <section class="tape-row" id="tapeRow" hidden>
@@ -225,6 +320,16 @@
         <div class="ctx-title">WEATHER</div>
         <div class="ctx-main" id="wxTemp">&mdash;</div>
         <div class="ctx-sub" id="wxDesc">Fetching&hellip;</div>
+      </div>
+      <div class="ctx-card">
+        <div class="ctx-title">FEELS LIKE</div>
+        <div class="ctx-main" id="wxFeels">&mdash;</div>
+        <div class="ctx-sub" id="wxHumidity">&mdash;</div>
+      </div>
+      <div class="ctx-card">
+        <div class="ctx-title">WIND</div>
+        <div class="ctx-main" id="windMain">&mdash;</div>
+        <div class="ctx-sub" id="windSub">&mdash;</div>
       </div>
       <div class="ctx-card">
         <div class="ctx-title">CLOUD BASE (EST.)</div>
@@ -250,6 +355,23 @@
     <div class="aircraft-list" id="aircraftList">
       <div class="empty-note">No data yet.</div>
     </div>
+
+    <div class="section-head"><span>TODAY IN YOUR AIRSPACE</span></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-title">DETECTED TODAY</div><div class="stat-main" id="statDetected">0</div></div>
+      <div class="stat-card"><div class="stat-title">PER HOUR (AVG)</div><div class="stat-main" id="statPerHour">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-title">MOST COMMON AIRLINE</div><div class="stat-main" id="statAirline">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-title">MOST COMMON TYPE</div><div class="stat-main" id="statType">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-title">HIGHEST</div><div class="stat-main" id="statHighest">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-title">FASTEST</div><div class="stat-main" id="statFastest">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-title">CLOSEST</div><div class="stat-main" id="statClosest">&mdash;</div></div>
+    </div>
+    <div class="timeline" id="timelineList"><div class="empty-note">Nothing spotted yet today.</div></div>
+
+    <div class="section-head"><span>LOGBOOK</span><span id="logbookCount">0</span></div>
+    <div class="logbook-list" id="logbookList">
+      <div class="empty-note">No aircraft logged yet.</div>
+    </div>
   </main>
 </div>
 
@@ -269,11 +391,43 @@
       <input type="number" id="maxAltInput" value="15000" min="0" max="60000">
     </label>
     <label class="field">Refresh interval (seconds)
-      <input type="number" id="pollInput" value="6" min="3" max="60">
+      <input type="number" id="pollInput" value="5" min="3" max="60">
     </label>
+    <div class="field-row">
+      <span>Use phone's compass<br><span style="font-size:11px;color:var(--text-dimmer)">Needle points relative to where you're facing</span></span>
+      <label class="switch"><input type="checkbox" id="compassToggle" checked><span class="switch-track"></span></label>
+    </div>
+    <button class="btn-secondary" id="enableCompassBtn" hidden>ENABLE COMPASS ACCESS</button>
     <button class="btn-primary" id="applySettings">APPLY</button>
     <button class="btn-secondary" id="updateLocationBtn">UPDATE LOCATION</button>
+
+    <div class="sheet-subhead">VIEW MODES</div>
+    <button class="btn-secondary" id="cockpitBtn">COCKPIT MODE (LANDSCAPE)</button>
+    <button class="btn-secondary" id="fullscreenBtn">FULLSCREEN MODE (VERTICAL)</button>
+    <button class="btn-secondary" id="arBtn">AR SPOTTER MODE</button>
+
+    <div class="sheet-subhead">DATA</div>
+    <button class="btn-secondary danger" id="clearLogbookBtn">CLEAR LOGBOOK</button>
+
+    <div class="version-block">
+      SQUAWK v<span id="verNum"></span> &middot; built <span id="verDate"></span><br>
+      Leaflet 1.9.4 &middot; SunCalc 1.9.0<br>
+      Sources: adsb.lol &middot; adsb.fi &middot; airplanes.live<br>
+      Weather: Open-Meteo
+    </div>
   </div>
+</div>
+
+<div class="cockpit-view" id="cockpitView" hidden>
+  <div class="cockpit-status" id="cockpitStatus">&mdash;</div>
+  <button class="icon-btn cockpit-exit" id="cockpitExit">&#10005;</button>
+</div>
+
+<div class="ar-overlay" id="arOverlay" hidden>
+  <video id="arVideo" autoplay playsinline muted></video>
+  <div class="ar-markers" id="arMarkers"></div>
+  <div class="ar-hint">Point your camera at the sky and pan slowly &middot; positions are approximate</div>
+  <button class="icon-btn ar-close" id="arClose">&#10005;</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -282,12 +436,22 @@
 (function(){
   "use strict";
 
+  var APP_VERSION = "1.4.0";
+  var BUILD_DATE = "2026-09-13";
+  var STORAGE_KEY = "squawk.settings.v1";
+  var LOGBOOK_KEY = "squawk.logbook.v1";
+
   /* ============ STATE ============ */
   var state = {
     lat:null, lon:null,
-    rangeNm:15, outerKm:15, innerKm:7, maxAltFt:15000, pollSec:6,
+    rangeNm:15, outerKm:15, innerKm:7, maxAltFt:15000, pollSec:5,
     apiIdx:0, pollTimer:null,
-    theme:"day"
+    theme:"day",
+    compassEnabled:true, compassSupported:false, deviceHeading:null, deviceBeta:null,
+    online:navigator.onLine,
+    dataStatus:"idle",
+    logbook:{}, timeline:[],
+    lastList:[], refreshing:false, arActive:false, cockpitActive:false, fullscreenActive:false
   };
 
   var APIS = [
@@ -320,23 +484,72 @@
   /* ============ DOM ============ */
   var $ = function(id){ return document.getElementById(id); };
   var els = {
-    apiStatus:$("apiStatus"), clock:$("clock"),
+    apiStatus:$("apiStatus"), statusDot:$("statusDot"), netStatus:$("netStatus"), clock:$("clock"),
+    statusBanner:$("statusBanner"), refreshBtn:$("refreshBtn"),
     locateBanner:$("locateBanner"), locateBtn:$("locateBtn"), locateError:$("locateError"),
     heroSection:$("heroSection"), tapeRow:$("tapeRow"), identStrip:$("identStrip"),
     targetDist:$("targetDist"), targetBearingDeg:$("targetBearingDeg"), targetLabel:$("targetLabel"),
+    compassModeNote:$("compassModeNote"),
     tapeAlt:$("tapeAlt"), tapeSpd:$("tapeSpd"), tapeVs:$("tapeVs"), tapeHdg:$("tapeHdg"),
     identCallsign:$("identCallsign"), identAirline:$("identAirline"), identType:$("identType"),
-    wxTemp:$("wxTemp"), wxDesc:$("wxDesc"),
+    wxTemp:$("wxTemp"), wxDesc:$("wxDesc"), wxFeels:$("wxFeels"), wxHumidity:$("wxHumidity"),
+    windMain:$("windMain"), windSub:$("windSub"),
     cloudBase:$("cloudBase"), cloudBaseNote:$("cloudBaseNote"),
     visMain:$("visMain"), visSub:$("visSub"),
     sunMain:$("sunMain"), sunSub:$("sunSub"),
     aircraftList:$("aircraftList"), otherCount:$("otherCount"),
+    statDetected:$("statDetected"), statPerHour:$("statPerHour"), statAirline:$("statAirline"),
+    statType:$("statType"), statHighest:$("statHighest"), statFastest:$("statFastest"), statClosest:$("statClosest"),
+    timelineList:$("timelineList"), logbookCount:$("logbookCount"), logbookList:$("logbookList"),
+    clearLogbookBtn:$("clearLogbookBtn"),
     settingsSheet:$("settingsSheet"), settingsBtn:$("settingsBtn"), closeSettings:$("closeSettings"),
     rangeInput:$("rangeInput"), outerInput:$("outerInput"), innerInput:$("innerInput"),
-    maxAltInput:$("maxAltInput"), pollInput:$("pollInput"),
+    maxAltInput:$("maxAltInput"), pollInput:$("pollInput"), compassToggle:$("compassToggle"),
+    enableCompassBtn:$("enableCompassBtn"),
     applySettings:$("applySettings"), updateLocationBtn:$("updateLocationBtn"),
-    themeToggle:$("themeToggle")
+    themeToggle:$("themeToggle"),
+    cockpitBtn:$("cockpitBtn"), fullscreenBtn:$("fullscreenBtn"), arBtn:$("arBtn"),
+    cockpitView:$("cockpitView"), cockpitExit:$("cockpitExit"), cockpitStatus:$("cockpitStatus"),
+    arOverlay:$("arOverlay"), arVideo:$("arVideo"), arMarkers:$("arMarkers"), arClose:$("arClose"),
+    verNum:$("verNum"), verDate:$("verDate")
   };
+  els.verNum.textContent = APP_VERSION;
+  els.verDate.textContent = BUILD_DATE;
+
+  /* ============ PERSISTENCE ============ */
+  function saveSettings(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        rangeNm:state.rangeNm, outerKm:state.outerKm, innerKm:state.innerKm, maxAltFt:state.maxAltFt,
+        pollSec:state.pollSec, theme:state.theme, compassEnabled:state.compassEnabled,
+        lat:state.lat, lon:state.lon
+      }));
+    }catch(e){}
+  }
+  function loadSettings(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      var s = JSON.parse(raw);
+      ["rangeNm","outerKm","innerKm","maxAltFt","pollSec","theme","compassEnabled","lat","lon"].forEach(function(k){
+        if(s[k]!=null) state[k]=s[k];
+      });
+    }catch(e){}
+  }
+  function saveLogbook(){
+    try{ localStorage.setItem(LOGBOOK_KEY, JSON.stringify({aircraft:state.logbook, timeline:state.timeline})); }catch(e){}
+  }
+  function loadLogbook(){
+    try{
+      var raw = localStorage.getItem(LOGBOOK_KEY);
+      if(!raw) return;
+      var d = JSON.parse(raw);
+      state.logbook = d.aircraft || {};
+      state.timeline = d.timeline || [];
+    }catch(e){}
+  }
+  loadSettings();
+  loadLogbook();
 
   /* ============ CLOCK ============ */
   function tickClock(){
@@ -346,13 +559,51 @@
   tickClock(); setInterval(tickClock, 15000);
 
   /* ============ THEME ============ */
+  document.body.setAttribute("data-theme", state.theme);
+  els.themeToggle.innerHTML = state.theme === "night" ? "&#9790;" : "&#9788;";
   els.themeToggle.addEventListener("click", function(){
     state.theme = state.theme === "day" ? "night" : "day";
     document.body.setAttribute("data-theme", state.theme);
     els.themeToggle.innerHTML = state.theme === "night" ? "&#9790;" : "&#9788;";
+    saveSettings();
   });
 
+  /* ============ NETWORK STATUS ============ */
+  function updateNetStatus(){
+    state.online = navigator.onLine;
+    if(!state.online){
+      els.netStatus.textContent = "\u25cb no internet connection";
+      els.netStatus.classList.add("offline");
+    } else {
+      els.netStatus.classList.remove("offline");
+      els.netStatus.textContent = "";
+    }
+  }
+  window.addEventListener("online", function(){ updateNetStatus(); poll(); });
+  window.addEventListener("offline", updateNetStatus);
+  updateNetStatus();
+
+  function setStatusBanner(kind, msg){
+    if(!msg){ els.statusBanner.hidden = true; return; }
+    els.statusBanner.hidden = false;
+    els.statusBanner.textContent = msg;
+    els.statusBanner.classList.toggle("warn", kind==="warn");
+  }
+
+  function setDataStatus(kind, text){
+    state.dataStatus = kind;
+    els.apiStatus.textContent = text;
+    els.statusDot.className = "dot" + (kind==="live" ? " live" : kind==="degraded" ? " degraded" : (kind==="down"||kind==="rate-limited") ? " bad" : "");
+  }
+
   /* ============ SETTINGS SHEET ============ */
+  els.rangeInput.value = state.rangeNm;
+  els.outerInput.value = state.outerKm;
+  els.innerInput.value = state.innerKm;
+  els.maxAltInput.value = state.maxAltFt;
+  els.pollInput.value = state.pollSec;
+  els.compassToggle.checked = state.compassEnabled;
+
   els.settingsBtn.addEventListener("click", function(){ els.settingsSheet.hidden=false; });
   els.closeSettings.addEventListener("click", function(){ els.settingsSheet.hidden=true; });
   els.settingsSheet.addEventListener("click", function(e){ if(e.target===els.settingsSheet) els.settingsSheet.hidden=true; });
@@ -362,13 +613,25 @@
     state.outerKm = clampNum(els.outerInput.value, 1, 200, 15);
     state.innerKm = clampNum(els.innerInput.value, 1, 200, 7);
     state.maxAltFt = clampNum(els.maxAltInput.value, 0, 60000, 15000);
-    state.pollSec = clampNum(els.pollInput.value, 3, 60, 6);
+    state.pollSec = clampNum(els.pollInput.value, 3, 60, 5);
     els.settingsSheet.hidden = true;
+    saveSettings();
     restartPolling();
   });
   els.updateLocationBtn.addEventListener("click", function(){
     els.settingsSheet.hidden = true;
     requestLocation();
+  });
+  els.compassToggle.addEventListener("change", function(){
+    state.compassEnabled = els.compassToggle.checked;
+    saveSettings();
+    updateCompassNote();
+    if(state.compassEnabled) initCompassSensor();
+  });
+  els.clearLogbookBtn.addEventListener("click", function(){
+    if(!confirm("Clear all logged aircraft and today's timeline? This can't be undone.")) return;
+    state.logbook = {}; state.timeline = [];
+    saveLogbook(); renderStats(); renderLogbook();
   });
 
   function clampNum(v,min,max,fallback){
@@ -391,6 +654,7 @@
       state.lat = pos.coords.latitude;
       state.lon = pos.coords.longitude;
       els.locateBtn.textContent = "USE MY LOCATION";
+      saveSettings();
       onLocationReady();
     }, function(err){
       els.locateBtn.textContent = "USE MY LOCATION";
@@ -410,7 +674,16 @@
     els.identStrip.hidden = false;
     initMap();
     fetchWeather();
+    initCompassSensor();
+    updateCompassNote();
+    renderStats();
+    renderLogbook();
     startPolling();
+  }
+
+  // Resume straight into tracking if a location was saved from a previous visit.
+  if(state.lat!=null && state.lon!=null){
+    onLocationReady();
   }
 
   /* ============ GEO MATH ============ */
@@ -436,10 +709,59 @@
     return dirs[Math.round(deg/22.5)%16];
   }
 
+  /* ============ DEVICE COMPASS ============ */
+  function initCompassSensor(){
+    if(!state.compassEnabled) return;
+    if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+      // iOS 13+ requires a user gesture before sensor access is granted.
+      els.enableCompassBtn.hidden = false;
+      els.enableCompassBtn.onclick = function(){
+        DeviceOrientationEvent.requestPermission().then(function(perm){
+          if(perm === "granted"){ els.enableCompassBtn.hidden = true; attachOrientation(); }
+          else { showLocateError && null; }
+        }).catch(function(){});
+      };
+    } else if("DeviceOrientationEvent" in window || "ondeviceorientationabsolute" in window){
+      attachOrientation();
+    }
+  }
+
+  function attachOrientation(){
+    state.compassSupported = true;
+    if("ondeviceorientationabsolute" in window){
+      window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+    } else {
+      window.addEventListener("deviceorientation", handleOrientation, true);
+    }
+    updateCompassNote();
+  }
+
+  var lastArRender = 0;
+  function handleOrientation(e){
+    var heading;
+    if(e.webkitCompassHeading!=null) heading = e.webkitCompassHeading;
+    else if(e.alpha!=null) heading = 360 - e.alpha;
+    if(heading==null || isNaN(heading)) return;
+    state.deviceHeading = (heading+360)%360;
+    state.deviceBeta = e.beta!=null ? e.beta : state.deviceBeta;
+    if(state.compassEnabled) render(state.lastList);
+    var now = Date.now();
+    if(state.arActive && now-lastArRender>120){ lastArRender=now; renderARMarkers(state.lastList); }
+  }
+
+  function updateCompassNote(){
+    if(!state.compassEnabled){
+      els.compassModeNote.textContent = "north-up (phone compass off)";
+    } else if(!state.compassSupported){
+      els.compassModeNote.textContent = "north-up (compass sensor unavailable)";
+    } else {
+      els.compassModeNote.textContent = "pointing relative to your heading";
+    }
+  }
+
   /* ============ COMPASS SVG ============ */
   function buildCompass(){
     var svg = document.getElementById("compassSvg");
-    var ns = "http://www.w3.org/2000/svg";
     var cx=150, cy=150, rOuter=130, rTick=118, rLabel=98;
     var html = "";
     html += '<circle cx="'+cx+'" cy="'+cy+'" r="'+rOuter+'" fill="none" stroke="var(--border)" stroke-width="2"/>';
@@ -465,7 +787,12 @@
 
   function setNeedle(bearing){
     var needle = document.getElementById("needle");
-    if(needle) needle.style.transform = "rotate("+bearing+"deg)";
+    if(!needle) return;
+    var rotate = bearing;
+    if(state.compassEnabled && state.deviceHeading!=null){
+      rotate = (bearing - state.deviceHeading + 360) % 360;
+    }
+    needle.style.transform = "rotate("+rotate+"deg)";
   }
 
   /* ============ MAP ============ */
@@ -524,6 +851,7 @@
   function fetchJson(url){
     function viaDirect(){
       return fetch(url).then(function(res){
+        if(res.status===429) throw new Error("HTTP 429");
         if(!res.ok) throw new Error("HTTP "+res.status);
         return res.json();
       });
@@ -531,6 +859,7 @@
     function viaOwnWorker(){
       if(!WORKER_PROXY_URL) return Promise.reject(new Error("no worker configured"));
       return fetch(WORKER_PROXY_URL+"/?url="+encodeURIComponent(url)).then(function(res){
+        if(res.status===429) throw new Error("HTTP 429");
         if(!res.ok) throw new Error("HTTP "+res.status);
         return res.json();
       });
@@ -538,6 +867,7 @@
     function viaPublicProxy(i){
       if(i>=CORS_PROXIES.length) return Promise.reject(new Error("all sources unreachable (CORS)"));
       return fetch(CORS_PROXIES[i](url)).then(function(res){
+        if(res.status===429) throw new Error("HTTP 429");
         if(!res.ok) throw new Error("HTTP "+res.status);
         return res.json();
       }).catch(function(){ return viaPublicProxy(i+1); });
@@ -556,16 +886,22 @@
 
   function fetchPlanesWithFailover(){
     var order = [0,1,2].map(function(i){ return (state.apiIdx+i)%3; });
-    var lastErr = null;
+    var errors = [];
     function tryNext(i){
-      if(i>=order.length) return Promise.reject(lastErr || new Error("All sources failed"));
+      if(i>=order.length){
+        var allRateLimited = errors.length===order.length && errors.every(function(e){ return /429/.test(e.message); });
+        var err = new Error(allRateLimited ? "RATE_LIMITED" : "ALL_DOWN");
+        return Promise.reject(err);
+      }
       var idx = order[i];
       return fetchFromApi(idx).then(function(result){
         state.apiIdx = idx;
-        els.apiStatus.textContent = "src: "+API_NAMES[idx];
+        var kind = i===0 ? "live" : "degraded";
+        setDataStatus(kind, "src: "+API_NAMES[idx] + (i>0 ? " (fallback)" : ""));
+        setStatusBanner(null);
         return result.aircraft;
       }).catch(function(err){
-        lastErr = err;
+        errors.push(err);
         return tryNext(i+1);
       });
     }
@@ -596,8 +932,13 @@
   }
 
   function poll(){
-    if(state.lat==null) return;
-    fetchPlanesWithFailover().then(function(raw){
+    if(state.lat==null) return Promise.resolve();
+    if(!navigator.onLine){
+      setDataStatus("down", "offline \u2014 no network");
+      setStatusBanner("bad", "No internet connection. Will retry automatically once you're back online.");
+      return Promise.resolve();
+    }
+    return fetchPlanesWithFailover().then(function(raw){
       var list = raw.map(normalize).filter(function(p){
         if(isNaN(p.lat) || isNaN(p.lon)) return false;
         if(state.maxAltFt!=null && p.alt!=null && p.alt > state.maxAltFt) return false;
@@ -605,10 +946,24 @@
       });
       list.forEach(function(p){ p.dist = distKm(state.lat,state.lon,p.lat,p.lon); p.bearing = bearingDeg(state.lat,state.lon,p.lat,p.lon); });
       list.sort(function(a,b){ return a.dist-b.dist; });
+      state.lastList = list;
       render(list);
+      recordLogbook(list);
+      renderStats();
+      renderLogbook();
+      if(state.arActive) renderARMarkers(list);
     }).catch(function(err){
-      var reason = (err && err.message) ? err.message : "unknown error";
-      els.apiStatus.textContent = "offline (" + reason + ") \u2014 retrying\u2026";
+      var msg = (err && err.message) ? err.message : "unknown error";
+      if(msg==="RATE_LIMITED"){
+        setDataStatus("rate-limited", "all sources rate-limited");
+        setStatusBanner("warn", "adsb.lol, adsb.fi and airplanes.live are all rate-limiting requests right now. Retrying automatically \u2014 try slowing the refresh interval in Settings if this keeps happening.");
+      } else if(msg==="ALL_DOWN"){
+        setDataStatus("down", "all sources unreachable");
+        setStatusBanner("bad", "Can't reach any aircraft data source right now. Will keep retrying every "+state.pollSec+"s.");
+      } else {
+        setDataStatus("down", "offline ("+msg+")");
+        setStatusBanner("bad", "Data fetch failed: "+msg);
+      }
       console.error(err);
     });
   }
@@ -620,6 +975,112 @@
   }
   function restartPolling(){ startPolling(); }
 
+  els.refreshBtn.addEventListener("click", function(){
+    if(state.refreshing) return;
+    state.refreshing = true;
+    els.refreshBtn.classList.add("spin");
+    poll().then(function(){
+      state.refreshing = false;
+      els.refreshBtn.classList.remove("spin");
+    });
+  });
+
+  /* ============ LOGBOOK + STATS ============ */
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  function recordLogbook(list){
+    var today = todayStr();
+    var nowIso = new Date().toISOString();
+    list.forEach(function(p){
+      var rec = state.logbook[p.id];
+      if(!rec){
+        rec = {
+          id:p.id, callsign:p.callsign, airline:airlineFor(p.callsign), type:p.type,
+          firstSeen:nowIso, lastSeen:nowIso, timesSeen:1,
+          minDistKm:p.dist, maxAltFt:p.alt||0, maxSpeedKt:p.gs||0, days:{}
+        };
+        state.logbook[p.id] = rec;
+        state.timeline.push({t:nowIso, id:p.id, callsign:p.callsign});
+        if(state.timeline.length>500) state.timeline.splice(0, state.timeline.length-500);
+      } else {
+        rec.lastSeen = nowIso;
+        rec.timesSeen++;
+        rec.callsign = p.callsign || rec.callsign;
+        rec.type = p.type || rec.type;
+        if(p.dist < rec.minDistKm) rec.minDistKm = p.dist;
+        if((p.alt||0) > rec.maxAltFt) rec.maxAltFt = p.alt||0;
+        if((p.gs||0) > rec.maxSpeedKt) rec.maxSpeedKt = p.gs||0;
+      }
+      rec.days[today] = (rec.days[today]||0)+1;
+    });
+    // trim logbook to the most recently seen 300 aircraft to keep storage bounded
+    var ids = Object.keys(state.logbook);
+    if(ids.length>300){
+      ids.sort(function(a,b){ return new Date(state.logbook[a].lastSeen)-new Date(state.logbook[b].lastSeen); });
+      ids.slice(0, ids.length-300).forEach(function(id){ delete state.logbook[id]; });
+    }
+    saveLogbook();
+  }
+
+  function topKey(obj){
+    var best=null, bestN=0;
+    Object.keys(obj).forEach(function(k){ if(obj[k]>bestN){ bestN=obj[k]; best=k; } });
+    return best;
+  }
+
+  function renderStats(){
+    var today = todayStr();
+    var todays = Object.keys(state.logbook).map(function(id){ return state.logbook[id]; })
+      .filter(function(r){ return r.days && r.days[today]; });
+
+    els.statDetected.textContent = todays.length;
+
+    var airlineCounts={}, typeCounts={};
+    todays.forEach(function(r){
+      airlineCounts[r.airline] = (airlineCounts[r.airline]||0)+1;
+      if(r.type) typeCounts[r.type] = (typeCounts[r.type]||0)+1;
+    });
+    els.statAirline.textContent = topKey(airlineCounts) || "\u2014";
+    els.statType.textContent = topKey(typeCounts) || "\u2014";
+
+    var highest = todays.reduce(function(m,r){ return r.maxAltFt>m ? r.maxAltFt : m; }, 0);
+    els.statHighest.textContent = highest ? fmtAlt(highest) : "\u2014";
+
+    var fastest = todays.reduce(function(m,r){ return r.maxSpeedKt>m ? r.maxSpeedKt : m; }, 0);
+    els.statFastest.textContent = fastest ? fmtSpd(fastest) : "\u2014";
+
+    var closest = todays.reduce(function(m,r){ return (m==null || r.minDistKm<m) ? r.minDistKm : m; }, null);
+    els.statClosest.textContent = closest!=null ? closest.toFixed(1)+" km" : "\u2014";
+
+    var hours = {};
+    state.timeline.forEach(function(e){ if(e.t.slice(0,10)===today) hours[e.t.slice(11,13)] = (hours[e.t.slice(11,13)]||0)+1; });
+    var hourKeys = Object.keys(hours);
+    els.statPerHour.textContent = hourKeys.length ? (todays.length/hourKeys.length).toFixed(1) : "\u2014";
+
+    var todaysTimeline = state.timeline.filter(function(e){ return e.t.slice(0,10)===today; }).slice(-20).reverse();
+    els.timelineList.innerHTML = todaysTimeline.length ? todaysTimeline.map(function(e){
+      return '<div class="timeline-row"><span class="tl-time">'+e.t.slice(11,16)+'</span><span class="tl-call">'+(e.callsign||"\u2014")+'</span></div>';
+    }).join("") : '<div class="empty-note">Nothing spotted yet today.</div>';
+  }
+
+  function renderLogbook(){
+    var ids = Object.keys(state.logbook);
+    els.logbookCount.textContent = ids.length;
+    if(!ids.length){
+      els.logbookList.innerHTML = '<div class="empty-note">No aircraft logged yet.</div>';
+      return;
+    }
+    var arr = ids.map(function(id){ return state.logbook[id]; })
+      .sort(function(a,b){ return new Date(b.lastSeen)-new Date(a.lastSeen); });
+    els.logbookList.innerHTML = arr.slice(0,100).map(function(r){
+      return '<div class="logbook-row">'+
+        '<div class="lb-top"><span class="lb-call">'+(r.callsign||"\u2014")+'</span><span class="lb-seen">x'+r.timesSeen+'</span></div>'+
+        '<div class="lb-meta">'+r.airline+(r.type ? ' \u00b7 '+r.type : '')+'</div>'+
+        '<div class="lb-stats">closest '+r.minDistKm.toFixed(1)+'km \u00b7 max '+fmtAlt(r.maxAltFt)+' \u00b7 '+fmtSpd(r.maxSpeedKt)+'</div>'+
+      '</div>';
+    }).join("");
+  }
+
   /* ============ RENDER ============ */
   function fmtAlt(ft){ return ft==null ? "\u2014" : Math.round(ft).toLocaleString()+" ft"; }
   function fmtSpd(kt){ return kt==null ? "\u2014" : Math.round(kt)+" kt"; }
@@ -629,6 +1090,7 @@
   }
 
   function render(list){
+    if(!list) return;
     var inOuter = list.filter(function(p){ return p.dist<=state.outerKm; });
     var primary = inOuter.length ? inOuter[0] : null;
     var hero = els.heroSection;
@@ -675,17 +1137,24 @@
     }
 
     updateMapMarkers(list);
+    if(state.cockpitActive) els.cockpitStatus.textContent = els.apiStatus.textContent;
   }
 
   /* ============ WEATHER + SUN ============ */
   function fetchWeather(){
     var url = "https://api.open-meteo.com/v1/forecast?latitude="+state.lat+"&longitude="+state.lon+
-      "&current=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover,visibility,weather_code,wind_speed_10m&timezone=auto";
+      "&current=temperature_2m,relative_humidity_2m,apparent_temperature,dew_point_2m,cloud_cover,visibility,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto";
     fetch(url).then(function(r){ return r.json(); }).then(function(data){
       var c = data.current;
       if(!c) return;
       els.wxTemp.textContent = Math.round(c.temperature_2m)+"\u00b0C";
       els.wxDesc.textContent = (WX_CODES[c.weather_code]||"\u2014")+" \u00b7 "+Math.round(c.cloud_cover)+"% cloud";
+
+      els.wxFeels.textContent = c.apparent_temperature!=null ? Math.round(c.apparent_temperature)+"\u00b0C" : "\u2014";
+      els.wxHumidity.textContent = c.relative_humidity_2m!=null ? c.relative_humidity_2m+"% humidity" : "\u2014";
+
+      els.windMain.textContent = c.wind_speed_10m!=null ? Math.round(c.wind_speed_10m)+" km/h" : "\u2014";
+      els.windSub.textContent = c.wind_direction_10m!=null ? "from "+compassLabel(c.wind_direction_10m)+" ("+Math.round(c.wind_direction_10m)+"\u00b0)" : "\u2014";
 
       var spread = c.temperature_2m - c.dew_point_2m;
       var baseFtAgl = Math.max(0, Math.round(spread*400));
@@ -696,13 +1165,14 @@
 
       var visKm = c.visibility!=null ? (c.visibility/1000) : null;
       els.visMain.textContent = visKm!=null ? visKm.toFixed(1)+" km" : "\u2014";
-      els.visSub.textContent = "wind "+Math.round(c.wind_speed_10m)+" km/h";
+      els.visSub.textContent = "ground conditions";
     }).catch(function(){
       els.wxDesc.textContent = "Unavailable";
     });
 
     updateSun();
     setInterval(updateSun, 60000);
+    setInterval(fetchWeather, 15*60000);
   }
 
   function updateSun(){
@@ -724,6 +1194,136 @@
 
   function fmtTime(d){
     return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+  }
+
+  /* ============ WAKE LOCK ============ */
+  var wakeLock = null;
+  function requestWakeLock(){
+    if("wakeLock" in navigator){
+      navigator.wakeLock.request("screen").then(function(wl){ wakeLock = wl; }).catch(function(){});
+    }
+  }
+  function releaseWakeLock(){
+    if(wakeLock){ wakeLock.release().catch(function(){}); wakeLock = null; }
+  }
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState==="visible" && (state.cockpitActive || state.fullscreenActive) && !wakeLock){
+      requestWakeLock();
+    }
+  });
+
+  /* ============ COCKPIT MODE ============ */
+  var cockpitAnchor = document.createComment("cockpit-anchor");
+  els.heroSection.parentNode.insertBefore(cockpitAnchor, els.heroSection);
+
+  function enterCockpit(){
+    els.settingsSheet.hidden = true;
+    state.cockpitActive = true;
+    els.cockpitView.hidden = false;
+    els.cockpitView.insertBefore(els.heroSection, els.cockpitView.firstChild);
+    els.cockpitView.insertBefore(els.tapeRow, els.cockpitExit);
+    els.cockpitView.insertBefore(els.identStrip, els.cockpitExit);
+    els.heroSection.hidden = false; els.tapeRow.hidden = false; els.identStrip.hidden = false;
+    if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){});
+    try{ if(screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(function(){}); }catch(e){}
+    requestWakeLock();
+  }
+  function exitCockpit(){
+    state.cockpitActive = false;
+    cockpitAnchor.parentNode.insertBefore(els.heroSection, cockpitAnchor);
+    cockpitAnchor.parentNode.insertBefore(els.tapeRow, cockpitAnchor.nextSibling);
+    cockpitAnchor.parentNode.insertBefore(els.identStrip, els.tapeRow.nextSibling);
+    els.cockpitView.hidden = true;
+    if(document.fullscreenElement) document.exitFullscreen().catch(function(){});
+    try{ if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); }catch(e){}
+    releaseWakeLock();
+  }
+  els.cockpitBtn.addEventListener("click", enterCockpit);
+  els.cockpitExit.addEventListener("click", exitCockpit);
+
+  /* ============ FULLSCREEN (VERTICAL) MODE ============ */
+  function enterFullscreenMode(){
+    els.settingsSheet.hidden = true;
+    state.fullscreenActive = true;
+    document.body.classList.add("fullscreen-mode");
+    if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function(){});
+    requestWakeLock();
+    if(!$("fsExitBtn")){
+      var btn = document.createElement("button");
+      btn.id = "fsExitBtn"; btn.className = "icon-btn fullscreen-exit"; btn.innerHTML = "&#10005;";
+      btn.addEventListener("click", exitFullscreenMode);
+      document.body.appendChild(btn);
+    }
+  }
+  function exitFullscreenMode(){
+    state.fullscreenActive = false;
+    document.body.classList.remove("fullscreen-mode");
+    if(document.fullscreenElement) document.exitFullscreen().catch(function(){});
+    releaseWakeLock();
+    var btn = $("fsExitBtn");
+    if(btn) btn.remove();
+  }
+  els.fullscreenBtn.addEventListener("click", enterFullscreenMode);
+  document.addEventListener("fullscreenchange", function(){
+    if(!document.fullscreenElement){
+      if(state.cockpitActive) exitCockpit();
+      if(state.fullscreenActive) exitFullscreenMode();
+    }
+  });
+
+  /* ============ AR MODE ============ */
+  var arStream = null;
+  function openAR(){
+    els.settingsSheet.hidden = true;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      alert("Camera access isn't available on this browser/device.");
+      return;
+    }
+    els.arOverlay.hidden = false;
+    navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:"environment" } }, audio:false }).then(function(stream){
+      arStream = stream;
+      els.arVideo.srcObject = stream;
+      state.arActive = true;
+      if(!state.compassSupported) initCompassSensor();
+      requestWakeLock();
+      renderARMarkers(state.lastList);
+    }).catch(function(){
+      alert("Camera permission was denied or the camera is unavailable.");
+      closeAR();
+    });
+  }
+  function closeAR(){
+    state.arActive = false;
+    if(arStream){ arStream.getTracks().forEach(function(t){ t.stop(); }); arStream = null; }
+    els.arOverlay.hidden = true;
+    els.arMarkers.innerHTML = "";
+    if(!state.cockpitActive && !state.fullscreenActive) releaseWakeLock();
+  }
+  els.arBtn.addEventListener("click", openAR);
+  els.arClose.addEventListener("click", closeAR);
+
+  function renderARMarkers(list){
+    if(!state.arActive || !list || state.deviceHeading==null){ els.arMarkers.innerHTML=""; return; }
+    var heading = state.deviceHeading;
+    var tiltFromHorizon = state.deviceBeta!=null ? (state.deviceBeta-90) : 0;
+    var HFOV = 60, VFOV = 45;
+    var html = "";
+    list.slice(0,15).forEach(function(p){
+      var rel = ((p.bearing - heading + 540) % 360) - 180;
+      if(Math.abs(rel) > HFOV/2+8) return;
+      var altM = (p.alt||0)*0.3048, distM = p.dist*1000;
+      var elevDeg = distM>0 ? Math.atan2(altM, distM)*180/Math.PI : 0;
+      var screenElev = elevDeg - tiltFromHorizon;
+      if(Math.abs(screenElev) > VFOV/2+8) return;
+      var xPct = 50 + (rel/(HFOV/2))*50;
+      var yPct = 50 - (screenElev/(VFOV/2))*50;
+      xPct = Math.max(3, Math.min(97, xPct));
+      yPct = Math.max(6, Math.min(94, yPct));
+      html += '<div class="ar-tag" style="left:'+xPct+'%;top:'+yPct+'%;">'+
+        '<div class="ar-tag-call">'+(p.callsign||"\u2014")+'</div>'+
+        '<div class="ar-tag-meta">'+fmtAlt(p.alt)+' \u00b7 '+p.dist.toFixed(1)+'km</div></div>';
+    });
+    els.arMarkers.innerHTML = html;
   }
 
 })();

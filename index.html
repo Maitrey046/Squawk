@@ -518,14 +518,18 @@
 
   function fetchPlanesWithFailover(){
     var order = [0,1,2].map(function(i){ return (state.apiIdx+i)%3; });
+    var lastErr = null;
     function tryNext(i){
-      if(i>=order.length) return Promise.reject(new Error("All sources failed"));
+      if(i>=order.length) return Promise.reject(lastErr || new Error("All sources failed"));
       var idx = order[i];
       return fetchFromApi(idx).then(function(result){
         state.apiIdx = idx;
         els.apiStatus.textContent = "src: "+API_NAMES[idx];
         return result.aircraft;
-      }).catch(function(){ return tryNext(i+1); });
+      }).catch(function(err){
+        lastErr = err;
+        return tryNext(i+1);
+      });
     }
     return tryNext(0);
   }
@@ -565,7 +569,9 @@
       list.sort(function(a,b){ return a.dist-b.dist; });
       render(list);
     }).catch(function(err){
-      els.apiStatus.textContent = "offline \u2014 retrying\u2026";
+      var reason = (err && err.message) ? err.message : "unknown error";
+      if(err instanceof TypeError) reason = "network/CORS blocked \u2014 open over https, not a local file";
+      els.apiStatus.textContent = "offline (" + reason + ") \u2014 retrying\u2026";
       console.error(err);
     });
   }
@@ -645,9 +651,11 @@
       els.wxDesc.textContent = (WX_CODES[c.weather_code]||"\u2014")+" \u00b7 "+Math.round(c.cloud_cover)+"% cloud";
 
       var spread = c.temperature_2m - c.dew_point_2m;
-      var baseFt = Math.max(0, Math.round(spread*400));
-      els.cloudBase.textContent = baseFt.toLocaleString()+" ft AGL";
-      els.cloudBaseNote.textContent = "spread "+spread.toFixed(1)+"\u00b0C \u00b7 estimate";
+      var baseFtAgl = Math.max(0, Math.round(spread*400));
+      var elevFt = data.elevation!=null ? data.elevation*3.281 : 0;
+      var baseFtMsl = Math.round(baseFtAgl + elevFt);
+      els.cloudBase.textContent = baseFtAgl.toLocaleString()+" ft AGL";
+      els.cloudBaseNote.textContent = "~"+baseFtMsl.toLocaleString()+" ft MSL \u2014 compare to ALT above";
 
       var visKm = c.visibility!=null ? (c.visibility/1000) : null;
       els.visMain.textContent = visKm!=null ? visKm.toFixed(1)+" km" : "\u2014";

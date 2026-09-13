@@ -512,8 +512,10 @@
   // address bar, or running a script on your own machine) gets blocked by
   // the browser before the response ever reaches our code. We try direct
   // first (harmless, and future-proof if a provider ever adds CORS), then
-  // fall back to public CORS proxies that fetch server-side and hand the
-  // response back to us with the right headers.
+  // your own Cloudflare Worker proxy (reliable, you control it), then
+  // public CORS proxies as a last resort.
+  var WORKER_PROXY_URL = "https://squawk.maitreyd046.workers.dev"; // your Cloudflare Worker
+
   var CORS_PROXIES = [
     function(url){ return "https://corsproxy.io/?url="+encodeURIComponent(url); },
     function(url){ return "https://api.allorigins.win/raw?url="+encodeURIComponent(url); }
@@ -526,14 +528,23 @@
         return res.json();
       });
     }
-    function viaProxy(i){
+    function viaOwnWorker(){
+      if(!WORKER_PROXY_URL) return Promise.reject(new Error("no worker configured"));
+      return fetch(WORKER_PROXY_URL+"/?url="+encodeURIComponent(url)).then(function(res){
+        if(!res.ok) throw new Error("HTTP "+res.status);
+        return res.json();
+      });
+    }
+    function viaPublicProxy(i){
       if(i>=CORS_PROXIES.length) return Promise.reject(new Error("all sources unreachable (CORS)"));
       return fetch(CORS_PROXIES[i](url)).then(function(res){
         if(!res.ok) throw new Error("HTTP "+res.status);
         return res.json();
-      }).catch(function(){ return viaProxy(i+1); });
+      }).catch(function(){ return viaPublicProxy(i+1); });
     }
-    return viaDirect().catch(function(){ return viaProxy(0); });
+    return viaDirect()
+      .catch(viaOwnWorker)
+      .catch(function(){ return viaPublicProxy(0); });
   }
 
   function fetchFromApi(idx){
